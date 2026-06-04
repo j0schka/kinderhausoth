@@ -15,6 +15,7 @@ const paymentLabel = { sepa: "SEPA-Lastschrift", paypal: "PayPal", kreditkarte: 
 export default function StepSummary({ formData, onNext, onBack }: Props) {
   const [privacyAccepted, setPrivacyAccepted] = useState(formData.privacyAccepted);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const amount = formData.customAmount
     ? parseFloat(formData.customAmount) || 0
@@ -23,10 +24,20 @@ export default function StepSummary({ formData, onNext, onBack }: Props) {
   const handleSubmit = async () => {
     if (!privacyAccepted) return;
     setSubmitting(true);
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1200));
-    setSubmitting(false);
-    onNext();
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error("Fehler beim Senden");
+      onNext();
+    } catch {
+      setSubmitError("Es ist ein Fehler aufgetreten. Bitte versuche es erneut.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const Row = ({ label, value }: { label: string; value: string }) => (
@@ -146,6 +157,12 @@ export default function StepSummary({ formData, onNext, onBack }: Props) {
           <>🚀 Förderantrag absenden</>
         )}
       </button>
+
+      {submitError && (
+        <div className="rounded-2xl p-4 text-sm font-bold text-center" style={{ background: "#FFF0F0", border: "1.5px solid #FF6B6B", color: "#FF6B6B" }}>
+          ⚠️ {submitError}
+        </div>
+      )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
