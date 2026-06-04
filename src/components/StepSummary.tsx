@@ -1,5 +1,6 @@
 import { FormData } from "@/app/page";
 import BackButton from "./BackButton";
+import Link from "next/link";
 import { useState } from "react";
 
 interface Props {
@@ -117,7 +118,7 @@ export default function StepSummary({ formData, onNext, onBack }: Props) {
           </div>
           <p className="text-sm font-semibold leading-relaxed" style={{ color: "#636e72" }}>
             Ich habe die{" "}
-            <span style={{ color: "#4DA8FF", fontWeight: "bold" }}>Datenschutzerklärung</span> gelesen
+            <Link href="/datenschutz" target="_blank" style={{ color: "#4DA8FF", fontWeight: "bold" }}>Datenschutzerklärung</Link> gelesen
             und bin damit einverstanden, dass meine Daten zur Bearbeitung des Förderantrags genutzt werden. *
           </p>
         </div>
