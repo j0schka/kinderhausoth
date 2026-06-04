@@ -4,8 +4,6 @@ import { useState } from "react";
 
 const METHODS: { value: PaymentMethod; label: string; emoji: string; desc: string }[] = [
   { value: "sepa", label: "SEPA-Lastschrift", emoji: "🏦", desc: "Direkt vom Konto – kostenlos" },
-  { value: "paypal", label: "PayPal", emoji: "🔵", desc: "Schnell & sicher" },
-  { value: "kreditkarte", label: "Kreditkarte", emoji: "💳", desc: "Visa, Mastercard, Amex" },
 ];
 
 interface Props {
@@ -186,26 +184,6 @@ export default function StepPayment({ formData, update, onNext, onBack }: Props)
               {errors.sepaConfirmed}
             </p>
           )}
-        </div>
-      )}
-
-      {/* PayPal info */}
-      {formData.paymentMethod === "paypal" && (
-        <div
-          className="rounded-2xl p-4 text-sm font-semibold"
-          style={{ background: "#EFF8FF", border: "1.5px solid #4DA8FF" }}
-        >
-          🔵 Du wirst nach dem Absenden zu PayPal weitergeleitet, um die Zahlung zu bestätigen.
-        </div>
-      )}
-
-      {/* Credit card info */}
-      {formData.paymentMethod === "kreditkarte" && (
-        <div
-          className="rounded-2xl p-4 text-sm font-semibold"
-          style={{ background: "#FFF0F0", border: "1.5px solid #FF6B6B" }}
-        >
-          💳 Du wirst nach dem Absenden zur sicheren Zahlungsseite weitergeleitet.
         </div>
       )}
 
