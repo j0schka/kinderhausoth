@@ -35,9 +35,9 @@ export interface FormData {
 }
 
 const defaultFormData: FormData = {
-  amount: 25,
+  amount: 100,
   customAmount: "",
-  interval: "einmalig",
+  interval: "monatlich",
   salutation: "",
   firstName: "",
   lastName: "",
