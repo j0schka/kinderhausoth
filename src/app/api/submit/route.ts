@@ -1,15 +1,17 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { NextRequest, NextResponse } from "next/server";
 
-// Initialised lazily so the module loads without a key at build time
-let _resend: Resend | null = null;
-function getResend() {
-  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
-  return _resend;
+function getTransport() {
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
 }
 
 const VORSTAND_EMAIL = "vorstand@kinderhaus-onkel-tom.org";
-const FROM_EMAIL = "Kinderhaus Onkel Tom <noreply@kinderhaus-onkel-tom.org>";
 
 const intervalLabel: Record<string, string> = {
   einmalig: "Einmalig",
@@ -278,27 +280,22 @@ export async function POST(req: NextRequest) {
     const amount = data.customAmount ? parseFloat(data.customAmount) : data.amount;
     const interval = intervalLabel[data.interval ?? "einmalig"];
 
-    const resend = getResend();
+    const transport = getTransport();
 
-    const [donorResult, vorstandResult] = await Promise.all([
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: [data.email],
+    await Promise.all([
+      transport.sendMail({
+        from: `"Kinderhaus Onkel Tom" <${process.env.GMAIL_USER}>`,
+        to: data.email as string,
         subject: `Deine Förderbestätigung – ${amount} € ${interval} 💛`,
         html: donorEmail(data),
       }),
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: [VORSTAND_EMAIL],
+      transport.sendMail({
+        from: `"Kinderhaus Onkel Tom" <${process.env.GMAIL_USER}>`,
+        to: VORSTAND_EMAIL,
         subject: `Neuer Förderantrag: ${data.firstName} ${data.lastName} – ${amount} € ${interval}`,
         html: vorstandEmail(data),
       }),
     ]);
-
-    if (donorResult.error || vorstandResult.error) {
-      console.error("Resend error:", donorResult.error ?? vorstandResult.error);
-      return NextResponse.json({ error: "E-Mail-Versand fehlgeschlagen" }, { status: 500 });
-    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
