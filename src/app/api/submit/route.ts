@@ -1,15 +1,14 @@
-import { Resend } from "resend";
+import { BrevoClient } from "@getbrevo/brevo";
 import { NextRequest, NextResponse } from "next/server";
 import { generateApplicationPdf } from "@/lib/generatePdf";
 
-let _resend: Resend | null = null;
-function getResend() {
-  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
-  return _resend;
+function getBrevo() {
+  return new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
 }
 
 const VORSTAND_EMAIL = "vorstand@kinderhaus-onkel-tom.org";
-const FROM_EMAIL = "Kinderhaus Onkel Tom <noreply@kinderhaus-onkel-tom.org>";
+const FROM_NAME = "Kinderhaus Onkel Tom";
+const FROM_EMAIL = process.env.BREVO_SENDER_EMAIL ?? "";
 
 const intervalLabel: Record<string, string> = {
   einmalig: "Einmalig",
@@ -278,45 +277,39 @@ export async function POST(req: NextRequest) {
     const amount = data.customAmount ? parseFloat(data.customAmount) : data.amount;
     const interval = intervalLabel[data.interval ?? "einmalig"];
 
-    const resend = getResend();
+    const brevo = getBrevo();
 
     // Step 1: Generate PDF
     let pdfBuffer: Buffer;
     try {
       pdfBuffer = await generateApplicationPdf(data);
-      console.log("PDF generated, size:", pdfBuffer.length);
     } catch (pdfErr) {
       console.error("PDF generation failed:", String(pdfErr));
       return NextResponse.json({ error: "PDF-Generierung fehlgeschlagen", detail: String(pdfErr) }, { status: 500 });
     }
 
     const pdfName = `Foerderantrag_${data.lastName}_${data.firstName}.pdf`.replace(/\s/g, "_");
-    const pdfAttachment = { filename: pdfName, content: pdfBuffer };
+    const pdfBase64 = pdfBuffer.toString("base64");
+    const attachment = [{ content: pdfBase64, name: pdfName }];
+    const sender = { name: FROM_NAME, email: FROM_EMAIL };
 
     // Step 2: Send emails
-    const [donorResult, vorstandResult] = await Promise.all([
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: [data.email as string],
+    await Promise.all([
+      brevo.transactionalEmails.sendTransacEmail({
+        sender,
+        to: [{ email: data.email as string }],
         subject: `Deine Förderbestätigung – ${amount} € ${interval}`,
-        html: donorEmail(data),
-        attachments: [pdfAttachment],
+        htmlContent: donorEmail(data),
+        attachment,
       }),
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: [VORSTAND_EMAIL],
+      brevo.transactionalEmails.sendTransacEmail({
+        sender,
+        to: [{ email: VORSTAND_EMAIL }],
         subject: `Neuer Förderantrag: ${data.firstName} ${data.lastName} – ${amount} € ${interval}`,
-        html: vorstandEmail(data),
-        attachments: [pdfAttachment],
+        htmlContent: vorstandEmail(data),
+        attachment,
       }),
     ]);
-
-    if (donorResult.error || vorstandResult.error) {
-      const err = donorResult.error ?? vorstandResult.error;
-      const errStr = `statusCode=${(err as {statusCode?: number})?.statusCode} name=${(err as {name?: string})?.name} message=${(err as {message?: string})?.message}`;
-      console.error("Resend error:", errStr);
-      return NextResponse.json({ error: "E-Mail-Versand fehlgeschlagen", detail: errStr }, { status: 500 });
-    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
