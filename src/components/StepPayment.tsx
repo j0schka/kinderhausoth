@@ -214,7 +214,7 @@ export default function StepPayment({ formData, update, onNext, onBack }: Props)
             </div>
             <div>
               <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>Verwendungszweck</p>
-              <p style={{ color: "#2D3436" }}>Förderung – {formData.firstName ? `${formData.firstName} ${formData.lastName}`.trim() : "Dein Name"}</p>
+              <p style={{ color: "#2D3436" }}>Fördermitgliedschaft {formData.lastName || "Nachname"}</p>
             </div>
           </div>
         </div>
