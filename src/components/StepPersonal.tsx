@@ -147,7 +147,7 @@ export default function StepPersonal({ formData, update, onNext, onBack }: Props
               📋 Spendenquittung gewünscht
             </p>
             <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>
-              Ab einer Förderhöhe von 300 € wird eine Spendenquittung zur steuerlichen Absetzung benötigt
+              Ab 300 € steuerlich absetzbar · Quittung wird einmal jährlich im Dezember ausgestellt
             </p>
           </div>
         </div>

@@ -54,7 +54,7 @@ export default function StepSuccess({ formData }: Props) {
         )}
         {formData.receiptWanted && (
           <p className="text-sm font-semibold mt-2" style={{ color: "#636e72" }}>
-            📋 Spendenquittung wird nach Eingang der Zahlung zugestellt.
+            📋 Spendenquittung wird einmal jährlich im Dezember ausgestellt.
           </p>
         )}
       </div>
