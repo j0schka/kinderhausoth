@@ -89,8 +89,8 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <span className="text-3xl">🏡</span>
           <div>
-            <p className="font-black text-base leading-tight" style={{ color: "#2D3436" }}>
-              Kinderhaus
+            <p className="font-black text-sm leading-tight" style={{ color: "#2D3436" }}>
+              Eltern-Initiativ-Kindertagesstätte Onkel-Toms-Hütte e.V.
             </p>
             <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>
               Förderantrag
