@@ -59,31 +59,6 @@ export default function StepSuccess({ formData }: Props) {
         )}
       </div>
 
-      {/* What happens next */}
-      <div className="card text-left">
-        <p className="font-black text-base mb-3" style={{ color: "#2D3436" }}>
-          🗺 Was passiert als nächstes?
-        </p>
-        <div className="flex flex-col gap-3">
-          {[
-            { icon: "📬", text: "Du erhältst eine Bestätigungs-E-Mail" },
-            { icon: "💰", text: "Die Zahlung wird eingezogen" },
-            {
-              icon: "🌱",
-              text: "Dein Beitrag fließt direkt in unsere Projekte",
-            },
-            ...(formData.receiptWanted ? [{ icon: "📋", text: "Spendenquittung wird zugestellt" }] : []),
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <span className="text-xl">{item.icon}</span>
-              <p className="text-sm font-semibold" style={{ color: "#636e72" }}>
-                {item.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Share */}
       <div className="card">
         <p className="font-black text-base mb-2" style={{ color: "#2D3436" }}>
