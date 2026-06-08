@@ -109,6 +109,8 @@ export default function StepPayment({ formData, update, onNext, onBack }: Props)
               onChange={(e) => update({ accountHolder: e.target.value })}
               onBlur={() => touch("accountHolder")}
               className="input-field"
+              autoComplete="cc-name"
+              name="accountHolder"
               style={touched.accountHolder && errors.accountHolder ? { borderColor: "#FF6B6B" } : {}}
             />
             {touched.accountHolder && errors.accountHolder && (
@@ -129,6 +131,9 @@ export default function StepPayment({ formData, update, onNext, onBack }: Props)
               onChange={(e) => update({ iban: formatIBAN(e.target.value) })}
               onBlur={() => touch("iban")}
               className="input-field"
+              autoComplete="off"
+              name="iban"
+              inputMode="text"
               style={{
                 letterSpacing: "0.05em",
                 ...(touched.iban && errors.iban ? { borderColor: "#FF6B6B" } : {}),

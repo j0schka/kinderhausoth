@@ -38,7 +38,8 @@ export default function StepPersonal({ formData, update, onNext, onBack }: Props
     label: string,
     placeholder: string,
     type = "text",
-    half = false
+    half = false,
+    autoComplete = "on"
   ) => (
     <div className={half ? "" : "col-span-2"}>
       <label className="block text-sm font-bold mb-1.5" style={{ color: "#2D3436" }}>
@@ -52,7 +53,8 @@ export default function StepPersonal({ formData, update, onNext, onBack }: Props
         onBlur={() => touch(id)}
         className="input-field"
         style={touched[id] && errors[id] ? { borderColor: "#FF6B6B" } : {}}
-        autoComplete="on"
+        autoComplete={autoComplete}
+        name={id}
       />
       {touched[id] && errors[id] && (
         <p className="text-xs font-bold mt-1" style={{ color: "#FF6B6B" }}>
@@ -85,6 +87,8 @@ export default function StepPersonal({ formData, update, onNext, onBack }: Props
             value={formData.salutation}
             onChange={(e) => update({ salutation: e.target.value })}
             className="input-field select"
+            autoComplete="honorific-prefix"
+            name="salutation"
           >
             <option value="">Bitte wählen</option>
             <option value="Herr">Herr</option>
@@ -95,11 +99,11 @@ export default function StepPersonal({ formData, update, onNext, onBack }: Props
 
         {/* Name grid */}
         <div className="grid grid-cols-2 gap-3">
-          {field("firstName", "Vorname *", "Max", "text", true)}
-          {field("lastName", "Nachname *", "Mustermann", "text", true)}
+          {field("firstName", "Vorname *", "Max", "text", true, "given-name")}
+          {field("lastName", "Nachname *", "Mustermann", "text", true, "family-name")}
         </div>
 
-        {field("email", "E-Mail-Adresse *", "max@beispiel.de", "email")}
+        {field("email", "E-Mail-Adresse *", "max@beispiel.de", "email", false, "email")}
 
         {/* Optional message */}
         <div>
@@ -157,13 +161,13 @@ export default function StepPersonal({ formData, update, onNext, onBack }: Props
           </p>
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              {field("street", "Straße *", "Musterstraße", "text", true)}
+              {field("street", "Straße *", "Musterstraße", "text", true, "address-line1")}
             </div>
-            <div>{field("houseNumber", "Nr. *", "12a", "text", true)}</div>
+            <div>{field("houseNumber", "Nr. *", "12a", "text", true, "address-line2")}</div>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div>{field("zip", "PLZ *", "12345", "text", true)}</div>
-            <div className="col-span-2">{field("city", "Ort *", "München", "text", true)}</div>
+            <div>{field("zip", "PLZ *", "12345", "text", true, "postal-code")}</div>
+            <div className="col-span-2">{field("city", "Ort *", "München", "text", true, "address-level2")}</div>
           </div>
         </div>
       )}
