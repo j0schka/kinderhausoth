@@ -38,28 +38,6 @@ export default function StepStart({ onNext }: Props) {
         </p>
       </div>
 
-      {/* Trust badges */}
-      <div className="flex gap-3 flex-wrap">
-        {[
-          { icon: "🔒", text: "Sicher & verschlüsselt" },
-          { icon: "📋", text: "Spendenquittung möglich" },
-          { icon: "✊", text: "Gemeinnützig" },
-        ].map((b) => (
-          <div
-            key={b.text}
-            className="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold"
-            style={{
-              background: "white",
-              border: "1.5px solid #2D3436",
-              boxShadow: "2px 2px 0 #2D3436",
-            }}
-          >
-            <span>{b.icon}</span>
-            <span>{b.text}</span>
-          </div>
-        ))}
-      </div>
-
       <button className="btn-primary text-lg py-4" onClick={onNext}>
         Jetzt Förderantrag stellen 🚀
       </button>

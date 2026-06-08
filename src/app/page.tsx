@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import StepStart from "@/components/StepStart";
-import StepAmount from "@/components/StepAmount";
 import StepInterval from "@/components/StepInterval";
 import StepPersonal from "@/components/StepPersonal";
 import StepPayment from "@/components/StepPayment";
@@ -55,7 +54,7 @@ const defaultFormData: FormData = {
   privacyAccepted: false,
 };
 
-const STEPS = ["start", "amount", "interval", "personal", "payment", "summary", "success"] as const;
+const STEPS = ["start", "interval", "personal", "payment", "summary", "success"] as const;
 type Step = (typeof STEPS)[number];
 
 export default function Home() {
@@ -115,9 +114,6 @@ export default function Home() {
       {/* Content */}
       <main className="flex-1 px-4 pb-10 max-w-lg mx-auto w-full">
         {step === "start" && <StepStart onNext={next} />}
-        {step === "amount" && (
-          <StepAmount formData={formData} update={update} onNext={next} onBack={back} />
-        )}
         {step === "interval" && (
           <StepInterval formData={formData} update={update} onNext={next} onBack={back} />
         )}
