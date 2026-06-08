@@ -29,7 +29,10 @@ export default function StepSummary({ formData, onNext, onBack }: Props) {
         body: JSON.stringify(formData),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.detail ?? json.error ?? "Fehler beim Senden");
+      if (!res.ok) {
+        const detail = typeof json.detail === "string" ? json.detail : JSON.stringify(json.detail);
+        throw new Error(detail || json.error || "Fehler beim Senden");
+      }
       onNext();
     } catch {
       setSubmitError("Es ist ein Fehler aufgetreten. Bitte versuche es erneut.");

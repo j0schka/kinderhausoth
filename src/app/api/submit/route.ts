@@ -280,19 +280,25 @@ export async function POST(req: NextRequest) {
 
     const resend = getResend();
 
-    // Generate PDF once, attach to both emails
-    const pdfBuffer = await generateApplicationPdf(data);
-    const pdfName = `Foerderantrag_${data.lastName}_${data.firstName}.pdf`.replace(/\s/g, "_");
-    const pdfAttachment = {
-      filename: pdfName,
-      content: pdfBuffer,
-    };
+    // Step 1: Generate PDF
+    let pdfBuffer: Buffer;
+    try {
+      pdfBuffer = await generateApplicationPdf(data);
+      console.log("PDF generated, size:", pdfBuffer.length);
+    } catch (pdfErr) {
+      console.error("PDF generation failed:", String(pdfErr));
+      return NextResponse.json({ error: "PDF-Generierung fehlgeschlagen", detail: String(pdfErr) }, { status: 500 });
+    }
 
+    const pdfName = `Foerderantrag_${data.lastName}_${data.firstName}.pdf`.replace(/\s/g, "_");
+    const pdfAttachment = { filename: pdfName, content: pdfBuffer };
+
+    // Step 2: Send emails
     const [donorResult, vorstandResult] = await Promise.all([
       resend.emails.send({
         from: FROM_EMAIL,
         to: [data.email as string],
-        subject: `Deine Förderbestätigung – ${amount} € ${interval} 💛`,
+        subject: `Deine Förderbestätigung – ${amount} € ${interval}`,
         html: donorEmail(data),
         attachments: [pdfAttachment],
       }),
@@ -307,8 +313,9 @@ export async function POST(req: NextRequest) {
 
     if (donorResult.error || vorstandResult.error) {
       const err = donorResult.error ?? vorstandResult.error;
-      console.error("Resend error:", JSON.stringify(err));
-      return NextResponse.json({ error: "E-Mail-Versand fehlgeschlagen", detail: err }, { status: 500 });
+      const errStr = `statusCode=${(err as {statusCode?: number})?.statusCode} name=${(err as {name?: string})?.name} message=${(err as {message?: string})?.message}`;
+      console.error("Resend error:", errStr);
+      return NextResponse.json({ error: "E-Mail-Versand fehlgeschlagen", detail: errStr }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
