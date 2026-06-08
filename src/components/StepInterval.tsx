@@ -2,9 +2,8 @@ import { FormData, Interval } from "@/app/page";
 import BackButton from "./BackButton";
 
 const OPTIONS: { value: Interval; label: string; sub: string; emoji: string }[] = [
-  { value: "einmalig", label: "Einmalig", sub: "Eine einzige Förderung", emoji: "🎁" },
   { value: "monatlich", label: "Monatlich", sub: "Regelmäßige Unterstützung", emoji: "📅" },
-  { value: "jaehrlich", label: "Jährlich", sub: "Einmal im Jahr", emoji: "🎉" },
+  { value: "einmalig", label: "Einmalig", sub: "Eine einzige Förderung", emoji: "🎁" },
 ];
 
 const PRESETS = [5, 10, 25, 50, 100, 200];
@@ -71,14 +70,6 @@ export default function StepInterval({ formData, update, onNext, onBack }: Props
                 </div>
               )}
             </div>
-            {formData.interval === opt.value && opt.value === "monatlich" && (
-              <div
-                className="mt-2 text-xs font-bold rounded-full px-3 py-1 inline-block"
-                style={{ background: "#FFD93D", border: "1.5px solid #2D3436" }}
-              >
-                ⭐ Meistgewählt
-              </div>
-            )}
           </button>
         ))}
       </div>

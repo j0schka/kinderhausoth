@@ -10,7 +10,7 @@ interface Props {
 }
 
 const intervalLabel = { einmalig: "Einmalig", monatlich: "Monatlich", jaehrlich: "Jährlich" };
-const paymentLabel = { sepa: "SEPA-Lastschrift", paypal: "PayPal", kreditkarte: "Kreditkarte" };
+const paymentLabel = { sepa: "SEPA-Lastschrift", dauerauftrag: "Dauerauftrag" };
 
 export default function StepSummary({ formData, onNext, onBack }: Props) {
   const [privacyAccepted, setPrivacyAccepted] = useState(formData.privacyAccepted);

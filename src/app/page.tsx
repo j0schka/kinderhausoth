@@ -10,7 +10,7 @@ import StepSuccess from "@/components/StepSuccess";
 import ProgressBar from "@/components/ProgressBar";
 
 export type Interval = "einmalig" | "monatlich" | "jaehrlich";
-export type PaymentMethod = "sepa" | "paypal" | "kreditkarte";
+export type PaymentMethod = "sepa" | "dauerauftrag";
 
 export interface FormData {
   amount: number;

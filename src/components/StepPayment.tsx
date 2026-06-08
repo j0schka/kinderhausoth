@@ -3,7 +3,8 @@ import BackButton from "./BackButton";
 import { useState } from "react";
 
 const METHODS: { value: PaymentMethod; label: string; emoji: string; desc: string }[] = [
-  { value: "sepa", label: "SEPA-Lastschrift", emoji: "🏦", desc: "Direkt vom Konto – kostenlos" },
+  { value: "sepa", label: "SEPA-Lastschrift", emoji: "🏦", desc: "Wir ziehen den Betrag automatisch ein" },
+  { value: "dauerauftrag", label: "Dauerauftrag", emoji: "🔁", desc: "Du richtest den Auftrag selbst ein" },
 ];
 
 interface Props {
@@ -184,6 +185,34 @@ export default function StepPayment({ formData, update, onNext, onBack }: Props)
               {errors.sepaConfirmed}
             </p>
           )}
+        </div>
+      )}
+
+      {/* Dauerauftrag info */}
+      {formData.paymentMethod === "dauerauftrag" && (
+        <div
+          className="rounded-2xl p-4 flex flex-col gap-3"
+          style={{ background: "#EFF8FF", border: "1.5px solid #4DA8FF" }}
+        >
+          <p className="font-black text-sm" style={{ color: "#2D3436" }}>
+            🔁 So richtest du den Dauerauftrag ein:
+          </p>
+          <p className="text-sm font-semibold leading-relaxed" style={{ color: "#636e72" }}>
+            Nach dem Absenden erhältst du eine E-Mail mit allen nötigen Kontodaten. Bitte richte
+            anschließend einen Dauerauftrag über deinen Online-Banking-Zugang ein.
+          </p>
+          <div
+            className="rounded-xl p-3 text-sm font-bold"
+            style={{ background: "white", border: "1.5px solid #4DA8FF" }}
+          >
+            <p style={{ color: "#8B5E3C" }}>Empfänger</p>
+            <p style={{ color: "#2D3436" }}>Kinderhaus Onkel Tom e.V.</p>
+            <p className="mt-2" style={{ color: "#8B5E3C" }}>Verwendungszweck</p>
+            <p style={{ color: "#2D3436" }}>Förderung – {formData.firstName || "dein Name"}</p>
+          </div>
+          <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>
+            💡 IBAN des Vereins erhältst du in der Bestätigungs-E-Mail.
+          </p>
         </div>
       )}
 
