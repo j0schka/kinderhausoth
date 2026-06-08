@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
+import { generateApplicationPdf } from "@/lib/generatePdf";
 
 let _resend: Resend | null = null;
 function getResend() {
@@ -279,18 +280,28 @@ export async function POST(req: NextRequest) {
 
     const resend = getResend();
 
+    // Generate PDF once, attach to both emails
+    const pdfBuffer = await generateApplicationPdf(data);
+    const pdfName = `Foerderantrag_${data.lastName}_${data.firstName}.pdf`.replace(/\s/g, "_");
+    const pdfAttachment = {
+      filename: pdfName,
+      content: pdfBuffer,
+    };
+
     const [donorResult, vorstandResult] = await Promise.all([
       resend.emails.send({
         from: FROM_EMAIL,
         to: [data.email as string],
         subject: `Deine Förderbestätigung – ${amount} € ${interval} 💛`,
         html: donorEmail(data),
+        attachments: [pdfAttachment],
       }),
       resend.emails.send({
         from: FROM_EMAIL,
         to: [VORSTAND_EMAIL],
         subject: `Neuer Förderantrag: ${data.firstName} ${data.lastName} – ${amount} € ${interval}`,
         html: vorstandEmail(data),
+        attachments: [pdfAttachment],
       }),
     ]);
 
