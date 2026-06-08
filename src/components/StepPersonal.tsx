@@ -143,7 +143,7 @@ export default function StepPersonal({ formData, update, onNext, onBack }: Props
               📋 Spendenquittung gewünscht
             </p>
             <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>
-              Adresse wird benötigt (steuerlich absetzbar ab 300 €)
+              Ab einer Förderhöhe von 300 € wird eine Spendenquittung zur steuerlichen Absetzung benötigt
             </p>
           </div>
         </div>
