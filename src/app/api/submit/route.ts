@@ -306,13 +306,14 @@ export async function POST(req: NextRequest) {
     ]);
 
     if (donorResult.error || vorstandResult.error) {
-      console.error("Resend error:", donorResult.error ?? vorstandResult.error);
-      return NextResponse.json({ error: "E-Mail-Versand fehlgeschlagen" }, { status: 500 });
+      const err = donorResult.error ?? vorstandResult.error;
+      console.error("Resend error:", JSON.stringify(err));
+      return NextResponse.json({ error: "E-Mail-Versand fehlgeschlagen", detail: err }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("Submit error:", err);
-    return NextResponse.json({ error: "Interner Fehler" }, { status: 500 });
+    console.error("Submit error:", String(err));
+    return NextResponse.json({ error: "Interner Fehler", detail: String(err) }, { status: 500 });
   }
 }

@@ -28,7 +28,8 @@ export default function StepSummary({ formData, onNext, onBack }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (!res.ok) throw new Error("Fehler beim Senden");
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.detail ?? json.error ?? "Fehler beim Senden");
       onNext();
     } catch {
       setSubmitError("Es ist ein Fehler aufgetreten. Bitte versuche es erneut.");
