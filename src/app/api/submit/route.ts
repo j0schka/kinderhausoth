@@ -312,8 +312,11 @@ export async function POST(req: NextRequest) {
     ]);
 
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("Submit error:", String(err));
-    return NextResponse.json({ error: "Interner Fehler", detail: String(err) }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : "";
+    console.error("Submit error message:", msg);
+    console.error("Submit error stack:", stack);
+    return NextResponse.json({ error: "Interner Fehler", detail: msg }, { status: 500 });
   }
 }
