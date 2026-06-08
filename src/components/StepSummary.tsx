@@ -1,6 +1,5 @@
 import { FormData } from "@/app/page";
 import BackButton from "./BackButton";
-import Link from "next/link";
 import { useState } from "react";
 
 interface Props {
@@ -13,7 +12,6 @@ const intervalLabel = { einmalig: "Einmalig", monatlich: "Monatlich", jaehrlich:
 const paymentLabel = { sepa: "SEPA-Lastschrift", dauerauftrag: "Dauerauftrag" };
 
 export default function StepSummary({ formData, onNext, onBack }: Props) {
-  const [privacyAccepted, setPrivacyAccepted] = useState(formData.privacyAccepted);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -22,7 +20,6 @@ export default function StepSummary({ formData, onNext, onBack }: Props) {
     : formData.amount;
 
   const handleSubmit = async () => {
-    if (!privacyAccepted) return;
     setSubmitting(true);
     setSubmitError("");
     try {
@@ -105,42 +102,12 @@ export default function StepSummary({ formData, onNext, onBack }: Props) {
         <Row label="Spendenquittung" value={formData.receiptWanted ? "Ja" : "Nein"} />
       </div>
 
-      {/* Privacy */}
-      <button
-        className="w-full text-left rounded-2xl p-4"
-        onClick={() => setPrivacyAccepted((v) => !v)}
-        style={{
-          border: `2px solid ${privacyAccepted ? "#6BCB77" : "#2D3436"}`,
-          background: privacyAccepted ? "#F0FFF4" : "white",
-          boxShadow: `3px 3px 0 ${privacyAccepted ? "#6BCB77" : "#2D3436"}`,
-          cursor: "pointer",
-        }}
-      >
-        <div className="flex gap-3">
-          <div
-            className="w-6 h-6 rounded flex-shrink-0 flex items-center justify-center mt-0.5"
-            style={{
-              border: "2px solid #2D3436",
-              background: privacyAccepted ? "#6BCB77" : "white",
-              minWidth: "1.5rem",
-            }}
-          >
-            {privacyAccepted && <span style={{ color: "white", fontSize: "13px" }}>✓</span>}
-          </div>
-          <p className="text-sm font-semibold leading-relaxed" style={{ color: "#636e72" }}>
-            Ich habe die{" "}
-            <Link href="/datenschutz" target="_blank" style={{ color: "#4DA8FF", fontWeight: "bold" }}>Datenschutzerklärung</Link> gelesen
-            und bin damit einverstanden, dass meine Daten zur Bearbeitung des Förderantrags genutzt werden. *
-          </p>
-        </div>
-      </button>
-
       <button
         className="btn-primary text-lg py-5"
         onClick={handleSubmit}
-        disabled={!privacyAccepted || submitting}
+        disabled={submitting}
         style={
-          !privacyAccepted || submitting
+          submitting
             ? { opacity: 0.5, cursor: "not-allowed", transform: "none", boxShadow: "none" }
             : {}
         }

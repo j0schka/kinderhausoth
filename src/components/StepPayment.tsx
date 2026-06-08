@@ -198,21 +198,25 @@ export default function StepPayment({ formData, update, onNext, onBack }: Props)
             🔁 So richtest du den Dauerauftrag ein:
           </p>
           <p className="text-sm font-semibold leading-relaxed" style={{ color: "#636e72" }}>
-            Nach dem Absenden erhältst du eine E-Mail mit allen nötigen Kontodaten. Bitte richte
-            anschließend einen Dauerauftrag über deinen Online-Banking-Zugang ein.
+            Bitte richte einen Dauerauftrag mit folgenden Daten in deinem Online-Banking ein:
           </p>
           <div
-            className="rounded-xl p-3 text-sm font-bold"
+            className="rounded-xl p-3 text-sm font-bold flex flex-col gap-2"
             style={{ background: "white", border: "1.5px solid #4DA8FF" }}
           >
-            <p style={{ color: "#8B5E3C" }}>Empfänger</p>
-            <p style={{ color: "#2D3436" }}>Kinderhaus Onkel Tom e.V.</p>
-            <p className="mt-2" style={{ color: "#8B5E3C" }}>Verwendungszweck</p>
-            <p style={{ color: "#2D3436" }}>Förderung – {formData.firstName || "dein Name"}</p>
+            <div>
+              <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>Empfänger</p>
+              <p style={{ color: "#2D3436" }}>Eltern-Initiativ-Kindertagesstätte Onkel-Toms-Hütte e.V.</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>IBAN</p>
+              <p style={{ color: "#2D3436", letterSpacing: "0.04em" }}>DE09 1001 0010 0016 7261 00</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>Verwendungszweck</p>
+              <p style={{ color: "#2D3436" }}>Förderung – {formData.firstName ? `${formData.firstName} ${formData.lastName}`.trim() : "Dein Name"}</p>
+            </div>
           </div>
-          <p className="text-xs font-semibold" style={{ color: "#8B5E3C" }}>
-            💡 IBAN des Vereins erhältst du in der Bestätigungs-E-Mail.
-          </p>
         </div>
       )}
 
