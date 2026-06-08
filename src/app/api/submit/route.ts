@@ -16,6 +16,13 @@ const intervalLabel: Record<string, string> = {
   jaehrlich: "Jährlich",
 };
 
+function getPaymentLabel(interval: string, method: string): string {
+  if (method === "sepa") {
+    return interval === "monatlich" ? "SEPA-Lastschrift (monatlich)" : "Einmalige Lastschrift";
+  }
+  return interval === "monatlich" ? "Dauerauftrag (monatlich)" : "Einmalige Überweisung";
+}
+
 function formatIBAN(iban: string) {
   return iban.replace(/\s/g, "").replace(/(.{4})/g, "$1 ").trim();
 }
@@ -24,6 +31,8 @@ function formatIBAN(iban: string) {
 function donorEmail(data: Record<string, unknown>): string {
   const amount = data.customAmount ? parseFloat(data.customAmount as string) : data.amount;
   const interval = intervalLabel[(data.interval as string) ?? "einmalig"];
+  const paymentLabel = getPaymentLabel(data.interval as string ?? "einmalig", data.paymentMethod as string ?? "sepa");
+  const isSepa = data.paymentMethod === "sepa";
   const isRecurring = data.interval !== "einmalig";
   const ibanMasked = `•••• •••• •••• ${String(data.iban ?? "").replace(/\s/g, "").slice(-4)}`;
 
@@ -79,7 +88,7 @@ function donorEmail(data: Record<string, unknown>): string {
               </tr>
               <tr style="border-bottom:1px solid #f1f2f6;">
                 <td style="font-size:13px;color:#8B5E3C;font-weight:600;">Zahlungsart</td>
-                <td style="font-size:13px;color:#2D3436;font-weight:700;text-align:right;">SEPA-Lastschrift</td>
+                <td style="font-size:13px;color:#2D3436;font-weight:700;text-align:right;">${paymentLabel}</td>
               </tr>
               <tr>
                 <td style="font-size:13px;color:#8B5E3C;font-weight:600;">IBAN (Ende)</td>
@@ -99,17 +108,19 @@ function donorEmail(data: Record<string, unknown>): string {
         <!-- SEPA info -->
         <tr>
           <td style="background:#EFF8FF;border-radius:20px;border:1.5px solid #4DA8FF;padding:20px;">
-            <h2 style="margin:0 0 12px;font-size:15px;font-weight:900;color:#2D3436;">🏦 SEPA-Lastschriftmandat</h2>
+            <h2 style="margin:0 0 12px;font-size:15px;font-weight:900;color:#2D3436;">🏦 ${paymentLabel}</h2>
             <p style="margin:0 0 8px;font-size:13px;color:#636e72;font-weight:600;line-height:1.6;">
-              Du hast uns ein SEPA-Lastschriftmandat erteilt. Wir werden den Betrag von <strong style="color:#2D3436;">${amount} €</strong> (${interval.toLowerCase()}) von deinem Konto einziehen.
+              ${isSepa
+                ? `Du hast uns ein SEPA-Lastschriftmandat erteilt. Wir werden den Betrag von <strong style="color:#2D3436;">${amount} €</strong> von deinem Konto einziehen.`
+                : `Bitte überweise den Betrag von <strong style="color:#2D3436;">${amount} €</strong> an die Vereins-IBAN (siehe Kontodaten in dieser E-Mail).`}
             </p>
-            <p style="margin:0 0 8px;font-size:13px;color:#636e72;font-weight:600;line-height:1.6;">
+            ${isSepa ? `<p style="margin:0 0 8px;font-size:13px;color:#636e72;font-weight:600;line-height:1.6;">
               <strong style="color:#2D3436;">Kontoinhaber:</strong> ${data.accountHolder}<br/>
               <strong style="color:#2D3436;">IBAN:</strong> ${ibanMasked}
             </p>
             <p style="margin:0;font-size:12px;color:#8B5E3C;font-weight:600;line-height:1.6;">
               Du kannst die Lastschrift innerhalb von <strong>8 Wochen</strong> ab Buchungsdatum bei deiner Bank zurückbuchen lassen.
-            </p>
+            </p>` : ""}
           </td>
         </tr>
 
@@ -198,7 +209,7 @@ function vorstandEmail(data: Record<string, unknown>): string {
             <!-- Amount highlight -->
             <div style="background:#FFFBEA;border:1.5px solid #FFD93D;border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;">
               <p style="margin:0;font-size:32px;font-weight:900;color:#2D3436;">${amount} €</p>
-              <p style="margin:4px 0 0;font-size:14px;font-weight:700;color:#8B5E3C;">${interval} · SEPA-Lastschrift</p>
+              <p style="margin:4px 0 0;font-size:14px;font-weight:700;color:#8B5E3C;">${getPaymentLabel((data.interval as string) ?? "einmalig", (data.paymentMethod as string) ?? "sepa")}</p>
             </div>
 
             <h2 style="margin:0 0 12px;font-size:14px;font-weight:900;color:#2D3436;">👤 Förderer</h2>
@@ -221,7 +232,7 @@ function vorstandEmail(data: Record<string, unknown>): string {
               </tr>` : ""}
             </table>
 
-            <h2 style="margin:0 0 12px;font-size:14px;font-weight:900;color:#2D3436;">🏦 Bankdaten für den Lastschrifteinzug</h2>
+            <h2 style="margin:0 0 12px;font-size:14px;font-weight:900;color:#2D3436;">🏦 Zahlungsdaten</h2>
             <table width="100%" cellpadding="5" cellspacing="0" style="font-size:13px;margin-bottom:20px;">
               <tr style="border-bottom:1px solid #f1f2f6;">
                 <td style="color:#8B5E3C;font-weight:600;width:140px;">Kontoinhaber</td>
@@ -288,7 +299,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "PDF-Generierung fehlgeschlagen", detail: String(pdfErr) }, { status: 500 });
     }
 
-    const pdfName = `Foerderantrag_${data.lastName}_${data.firstName}.pdf`.replace(/\s/g, "_");
+    const pdfName = `Foerderantrag_${data.lastName}.pdf`.replace(/\s/g, "_");
     const pdfBase64 = pdfBuffer.toString("base64");
     const attachment = [{ content: pdfBase64, name: pdfName }];
     const sender = { name: FROM_NAME, email: FROM_EMAIL };

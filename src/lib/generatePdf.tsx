@@ -140,33 +140,49 @@ const styles = StyleSheet.create({
   },
 });
 
-const intervalLabel: Record<string, string> = {
-  einmalig: "Einmalig",
-  monatlich: "Monatlich",
-  jaehrlich: "Jährlich",
-};
-
-const paymentLabel: Record<string, string> = {
-  sepa: "SEPA-Lastschrift",
-  dauerauftrag: "Dauerauftrag",
-};
-
 function formatIBAN(iban: string) {
   return iban.replace(/\s/g, "").replace(/(.{4})/g, "$1 ").trim();
+}
+
+// Smart payment label: combines interval + method
+function getPaymentLabel(interval: string, method: string): string {
+  if (method === "sepa") {
+    return interval === "monatlich" ? "SEPA-Lastschrift (monatlich)" : "Einmalige Lastschrift";
+  }
+  if (method === "dauerauftrag") {
+    return interval === "monatlich" ? "Dauerauftrag (monatlich)" : "Einmalige Überweisung";
+  }
+  return method;
+}
+
+function getNoteText(interval: string, method: string, amount: number): string {
+  if (method === "sepa" && interval === "monatlich") {
+    return `Mit diesem Antrag wurde ein SEPA-Lastschriftmandat erteilt. Der Betrag von ${amount} € wird monatlich vom angegebenen Konto eingezogen. Eine Rückbuchung ist innerhalb von 8 Wochen ab Buchungsdatum möglich.`;
+  }
+  if (method === "sepa" && interval === "einmalig") {
+    return `Mit diesem Antrag wurde ein einmaliges SEPA-Lastschriftmandat erteilt. Der Betrag von ${amount} € wird einmalig vom angegebenen Konto eingezogen. Eine Rückbuchung ist innerhalb von 8 Wochen ab Buchungsdatum möglich.`;
+  }
+  if (method === "dauerauftrag" && interval === "monatlich") {
+    return `Bitte richte einen monatlichen Dauerauftrag über ${amount} € in deinem Online-Banking ein. Die Kontodaten des Vereins findest du in der Bestätigungs-E-Mail.`;
+  }
+  // einmalig + dauerauftrag = einmalige Überweisung
+  return `Bitte überweise den Betrag von ${amount} € einmalig an die Vereins-IBAN. Die Kontodaten findest du in der Bestätigungs-E-Mail.`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generateApplicationPdf(data: Record<string, any>): Promise<Buffer> {
   const amount = data.customAmount ? parseFloat(data.customAmount) : data.amount;
-  const interval = intervalLabel[data.interval ?? "einmalig"];
-  const payment = paymentLabel[data.paymentMethod ?? "sepa"];
+  const interval = data.interval ?? "einmalig";
+  const method = data.paymentMethod ?? "sepa";
+  const paymentLabel = getPaymentLabel(interval, method);
+  const noteText = getNoteText(interval, method, amount);
   const now = new Date().toLocaleDateString("de-DE", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     timeZone: "Europe/Berlin",
   });
-  const isSepa = data.paymentMethod === "sepa";
+  const isSepa = method === "sepa";
 
   const doc = (
     <Document
@@ -177,7 +193,7 @@ export async function generateApplicationPdf(data: Record<string, any>): Promise
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Text style={styles.headerTitle}>🏡 Kinderhaus Onkel Tom</Text>
+            <Text style={styles.headerTitle}>Kinderhaus Onkel Tom</Text>
             <Text style={styles.headerSub}>Förderantrag – Bestätigung</Text>
           </View>
           <Text style={styles.headerDate}>Datum: {now}</Text>
@@ -187,7 +203,7 @@ export async function generateApplicationPdf(data: Record<string, any>): Promise
         <View style={styles.highlight}>
           <View>
             <Text style={styles.highlightAmount}>{amount} €</Text>
-            <Text style={styles.highlightInterval}>{interval} · {payment}</Text>
+            <Text style={styles.highlightInterval}>{paymentLabel}</Text>
           </View>
           <View>
             <Text style={{ fontSize: 9, color: "#8B5E3C", textAlign: "right" }}>Förderer</Text>
@@ -243,12 +259,8 @@ export async function generateApplicationPdf(data: Record<string, any>): Promise
               <Text style={styles.value}>{amount} €</Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.label}>Zahlungsrhythmus</Text>
-              <Text style={styles.value}>{interval}</Text>
-            </View>
-            <View style={styles.row}>
               <Text style={styles.label}>Zahlungsart</Text>
-              <Text style={styles.value}>{payment}</Text>
+              <Text style={styles.value}>{paymentLabel}</Text>
             </View>
             <View style={styles.rowLast}>
               <Text style={styles.label}>Spendenquittung</Text>
@@ -267,7 +279,7 @@ export async function generateApplicationPdf(data: Record<string, any>): Promise
         {isSepa && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>SEPA-Lastschriftmandat</Text>
+              <Text style={styles.sectionTitle}>{interval === "monatlich" ? "SEPA-Lastschriftmandat" : "Einmalige Lastschrift – Bankdaten"}</Text>
             </View>
             <View style={styles.sectionBody}>
               <View style={styles.row}>
@@ -284,11 +296,7 @@ export async function generateApplicationPdf(data: Record<string, any>): Promise
 
         {/* Note */}
         <View style={styles.noteBox}>
-          <Text style={styles.noteText}>
-            {isSepa
-              ? `Mit diesem Antrag wurde ein SEPA-Lastschriftmandat erteilt. Der Betrag von ${amount} € wird ${interval.toLowerCase()} vom angegebenen Konto eingezogen. Eine Rückbuchung ist innerhalb von 8 Wochen ab Buchungsdatum möglich.`
-              : `Es wurde ein Dauerauftrag über ${amount} € (${interval.toLowerCase()}) beantragt. Die Bankverbindung des Vereins wird separat per E-Mail mitgeteilt. Bitte richte den Dauerauftrag in deinem Online-Banking ein.`}
-          </Text>
+          <Text style={styles.noteText}>{noteText}</Text>
         </View>
 
         {/* Footer */}
